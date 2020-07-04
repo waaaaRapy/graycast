@@ -37,7 +37,7 @@ int consume_number() {
     token = token->next;
     return val;
   } else {
-    error("数ではありません");
+    error(token->str, "数ではありません");
   }
 }
 
@@ -46,6 +46,9 @@ int main(int argc, char** argv) {
     fprintf(stderr, "引数の個数が正しくありません\n");
     return 1;
   }
+
+  // 入力をグローバルに保存しておく
+  user_input = argv[1];
 
   // トークナイズする
   token = tokenize(argv[1]);
@@ -69,7 +72,7 @@ int main(int argc, char** argv) {
       continue;
     }
 
-    error("期待されていない記号です");
+    error(token->str, "期待されていない記号です");
   }
 
   printf("  ret\n");

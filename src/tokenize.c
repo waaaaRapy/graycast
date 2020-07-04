@@ -36,7 +36,7 @@ Token* tokenize(char* p) {
       continue;
     }
 
-    error("トークナイズできません");
+    error(p, "トークナイズできません");
   }
 
   cur = new_token(TK_EOF, cur, p);

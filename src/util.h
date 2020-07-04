@@ -1,3 +1,5 @@
 #pragma once
 
-void error(char* fmt, ...);
+extern char* user_input;
+
+void error(char* loc, char* fmt, ...);
