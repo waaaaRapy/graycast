@@ -7,7 +7,7 @@ CFLAGS = -std=c11 -g -static
 $(TARGET): $(OBJS)
 	$(CC) -o $@ $(OBJS) $(LDFLAGS)
 
-$(OBJS): $(SRCS)
+build/%.o: src/%.c
 	@[ -d build ] || (echo "mkdir build" && mkdir build)
 	$(CC) -c -o $@ $<
 
