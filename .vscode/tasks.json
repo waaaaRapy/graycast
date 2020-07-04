@@ -6,7 +6,7 @@
     {
       "label": "make",
       "type": "shell",
-      "command": "cd src && make",
+      "command": "make",
       "problemMatcher": [],
       "group": {
         "kind": "build",
