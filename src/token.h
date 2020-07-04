@@ -19,5 +19,11 @@ struct Token {
   char* str;       // トークン文字列
 };
 
-Token* tokenize(char* p);
+void tokenize(char* p);
 Token* new_token(TokenKind, Token* prev, char* str);
+
+extern Token* token;
+
+bool at_eof();
+bool consume_if(char op);
+int consume_number();

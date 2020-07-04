@@ -1,45 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "tokenize.h"
+#include "token.h"
 #include "util.h"
-
-/** 現在着目しているトークン */
-Token* token;
-
-/** 入力の終了かどうか判定 */
-bool at_eof() { return token->kind == TK_EOF; }
-
-/**
- * トークンが期待している記号のとき、トークンを消費して次に進める
- *
- * @param op 期待している記号
- * @return トークンを消費したかどうか
- */
-bool consume_if(char op) {
-  if (token->kind == TK_RESERVED && *token->str == op) {
-    token = token->next;
-    return true;
-  } else {
-    return false;
-  }
-}
-
-/**
- * トークンが数のとき、トークンを消費して次に進める
- * そうでなければエラーを報告して終了する。
- *
- * @return トークンの数値
- */
-int consume_number() {
-  if (token->kind == TK_NUM) {
-    int val = token->val;
-    token = token->next;
-    return val;
-  } else {
-    error(token->str, "数ではありません");
-  }
-}
 
 int main(int argc, char** argv) {
   if (argc != 2) {
@@ -51,7 +14,7 @@ int main(int argc, char** argv) {
   user_input = argv[1];
 
   // トークナイズする
-  token = tokenize(argv[1]);
+  tokenize(argv[1]);
 
   printf(".intel_syntax noprefix\n");
   printf(".globl main\n");
