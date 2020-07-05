@@ -3,7 +3,8 @@
 /**
  * BNF:
  *  expr    := mul ("+" mul | "-" mul)*
- *  mul     := primary ("*" primary | "/" primary)*
+ *  mul     := unary ("*" unary | "/" unary)*
+ *  unary   := ("+" | "-")? primary
  *  primary := num | "(" expr ")"
  */
 
@@ -35,4 +36,5 @@ Node* parse();
 
 Node* expr();
 Node* mul();
+Node* unary();
 Node* primary();

@@ -43,17 +43,27 @@ Node* expr() {
 
 /** mulをパース */
 Node* mul() {
-  Node* node = primary();
+  Node* node = unary();
 
   for (;;) {
     if (consume_if('*')) {
-      node = new_node(ND_MUL, node, primary());
+      node = new_node(ND_MUL, node, unary());
     } else if (consume_if('/')) {
-      node = new_node(ND_DIV, node, primary());
+      node = new_node(ND_DIV, node, unary());
     } else {
       return node;
     }
   }
+}
+
+/** unaryをパース */
+Node* unary() {
+  if (consume_if('+')) {
+    return primary();
+  } else if (consume_if('-')) {
+    return new_node(ND_SUB, new_node_num(0), primary());
+  }
+  return primary();
 }
 
 /** primaryをパース */
