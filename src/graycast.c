@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "generator.h"
+#include "parser.h"
 #include "token.h"
 #include "util.h"
 
@@ -15,29 +17,10 @@ int main(int argc, char** argv) {
 
   // トークナイズする
   tokenize(argv[1]);
+  // 抽象構文木を生成
+  Node* ast = parse();
+  // コードを生成
+  generate_main(ast);
 
-  printf(".intel_syntax noprefix\n");
-  printf(".globl main\n");
-  printf("main:\n");
-
-  // 最初の数値を処理
-  printf("  mov rax, %d\n", consume_number());
-
-  // (+|-)数値 が続く限り処理
-  while (!at_eof()) {
-    if (consume_if('+')) {
-      printf("  add rax, %d\n", consume_number());
-      continue;
-    }
-
-    if (consume_if('-')) {
-      printf("  sub rax, %d\n", consume_number());
-      continue;
-    }
-
-    error(token->str, "期待されていない記号です");
-  }
-
-  printf("  ret\n");
   return 0;
 }
