@@ -9,7 +9,7 @@ $(TARGET): $(OBJS)
 
 build/%.o: src/%.c
 	@[ -d build ] || (echo "mkdir build" && mkdir build)
-	$(CC) -c -o $@ $<
+	$(CC) $(CFLAGS) -c -o $@ $<
 
 test: $(TARGET)
 	cd build && ../test/test.sh
