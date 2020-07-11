@@ -1,0 +1,10 @@
+{
+	"println": {
+		"scope": "c",
+		"prefix": "println",
+		"body": [
+			"printf(\"  $1\\n\");",
+		],
+		"description": "print line"
+	}
+}
