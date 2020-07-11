@@ -2,6 +2,8 @@
 
 #include <stdlib.h>
 
+#include "list.h"
+
 /**
  * 新しいASTノードを生成
  */
@@ -38,21 +40,15 @@ Node* new_node_lvar(char name) {
 /** グローバルのtokenからASTを構築 */
 Node** parse() { return program(); }
 
-/** stmtノードを保存する配列 */
-Node* codes[100];
-
-/** programをパースして結果をcode[]に保存する */
+/** programをパースする */
 Node** program() {
-  int i = 0;
+  List* codes = list_new(0);
+
   while (!at_eof()) {
-    codes[i++] = stmt();
-    if (i >= 100) {
-      error(NULL, "コードが長すぎます。");
-      exit(1);
-    }
+    list_add(codes, stmt());
   }
-  codes[i] = NULL;
-  return codes;
+
+  return (Node**)codes->array;
 }
 
 /** stmtをパース */
