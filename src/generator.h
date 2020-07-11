@@ -4,5 +4,7 @@
 
 #include "parser.h"
 
-void generate_main(Node* ast);
-void generate(Node* ast);
+void generate_main(Node** ast);
+void generate_function(char* name, Node** codes);
+void generate_leftval(Node* node);
+void generate(Node* node);

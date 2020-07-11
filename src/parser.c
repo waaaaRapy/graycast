@@ -23,11 +23,60 @@ Node* new_node_num(int val) {
   return node;
 }
 
+/**
+ * 新しいローカル変数ASTノードを作成
+
+ * @param name 変数名
+ */
+Node* new_node_lvar(char name) {
+  Node* node = calloc(1, sizeof(Node));
+  node->kind = ND_LVAR;
+  node->offset = (name - 'a' + 1) * 8;
+  return node;
+}
+
 /** グローバルのtokenからASTを構築 */
-Node* parse() { return expr(); }
+Node** parse() { return program(); }
+
+/** stmtノードを保存する配列 */
+Node* codes[100];
+
+/** programをパースして結果をcode[]に保存する */
+Node** program() {
+  int i = 0;
+  while (!at_eof()) {
+    codes[i++] = stmt();
+    if (i >= 100) {
+      error(NULL, "コードが長すぎます。");
+      exit(1);
+    }
+  }
+  codes[i] = NULL;
+  return codes;
+}
+
+/** stmtをパース */
+Node* stmt() {
+  Node* node = expr();
+  if (consume_if(";")) {
+    return node;
+  } else {
+    error(token->str, "';'ではありません");
+  }
+}
 
 /** exprをパース */
-Node* expr() { return equality(); }
+Node* expr() { return assign(); }
+
+/** assignをパース */
+Node* assign() {
+  Node* node = equality();
+  if (consume_if("=")) {
+    node = new_node(ND_ASSIGN, node, assign());
+  } else {
+    return node;
+  }
+}
 
 /** equalityをパース */
 Node* equality() {
@@ -105,16 +154,27 @@ Node* unary() {
 
 /** primaryをパース */
 Node* primary() {
+  // "(" expr ")" の場合
   if (consume_if("(")) {
-    // "(" expr ")" の場合
     Node* node = expr();
     if (!consume_if(")")) {
       error(token->str, "')'ではありません");
     };
     return node;
-  } else {
-    // num
-    int val = consume_number();
-    return new_node_num(val);
   }
+
+  // ident の場合
+  char* name = consume_if_ident();
+  if (name != NULL) {
+    return new_node_lvar(*name);
+  }
+
+  // num の場合
+  int* val = consume_if_number();
+  if (val != NULL) {
+    return new_node_num(*val);
+  }
+
+  // その他の場合
+  error(token->str, "変数名または数値が期待されています");
 }

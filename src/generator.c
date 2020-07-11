@@ -1,21 +1,72 @@
 #include "generator.h"
 
 /** ASTからコードを生成する */
-void generate_main(Node* ast) {
+void generate_main(Node** ast) {
   printf(".intel_syntax noprefix\n");
   printf(".globl main\n");
-  printf("main:\n");
-  generate(ast);
-  printf("  pop rax\n");
-  printf("  ret\n");
+  generate_function("main", ast);
+}
+
+/** 関数のコードを生成する */
+void generate_function(char* name, Node** codes) {
+  printf("%s:\n", name);
+  // プロローグ
+  printf("  push rbp\n");             // 開始時点のRBPを退避
+  printf("  mov rbp, rsp\n");         // 関数内でのRBPを設定
+  printf("  sub rsp, %d\n", 8 * 26);  // ローカル変数26個分の領域を確保
+
+  // 本体のコード生成
+  for (Node** code = codes; *code != NULL; code++) {
+    generate(*code);
+    printf("  pop rax\n");  // 式の結果をpopしておく
+  }
+
+  // エピローグ
+  printf("  mov rsp, rbp\n");  // ローカル変数分のスタックを戻す
+  printf("  pop rbp\n");       // RBPを復元
+  printf("  ret\n");           // RAXに残っている値を返す
+}
+
+/** 左辺値のコードを生成 */
+void generate_leftval(Node* node) {
+  if (node->kind != ND_LVAR) {
+    error(NULL, "代入できない左辺値です");
+  }
+
+  // 左辺値のアドレス(RBP - node->offset)をスタックにpushする
+  printf("  lea rax, [rbp - %d]\n", node->offset);
+  printf("  push rax\n");
 }
 
 /** AST nodeを評価してスタックに積むコードを生成 */
 void generate(Node* node) {
-  // 数値ノードの場合、スタックに値をpushするだけ
-  if (node->kind == ND_NUM) {
-    printf("  push %d\n", node->val);
-    return;
+  switch (node->kind) {
+    case ND_NUM:
+      // 数値ノードの場合、スタックに値をpushするだけ
+      printf("  push %d\n", node->val);
+      return;
+    case ND_LVAR:
+      // ローカル変数の場合、
+      // 1.左辺値のアドレスをpushする
+      generate_leftval(node);
+      // 2.アドレスから値を読みだしてpushする(右辺値に変換)
+      printf("  pop rax\n");
+      printf("  mov rax, [rax]\n");
+      printf("  push rax\n");
+      return;
+    case ND_ASSIGN:
+      // 代入の場合
+      // 1. 左辺値のアドレスをpushする
+      generate_leftval(node->lhs);
+      // 2. 右辺値の値をpushする
+      generate(node->rhs);
+      // 3. 左辺値のアドレスに右辺値の値を保存
+      printf("  pop rdi\n");
+      printf("  pop rax\n");
+      printf("  mov [rax], rdi\n");
+      // 4. 代入した値をpush
+      printf("  push rdi\n");
+      return;
   }
 
   // 左辺・右辺を評価してスタックに積む

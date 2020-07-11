@@ -10,7 +10,10 @@
 Token* token;
 
 char* RESERVED_TOKENS[] = {
-    "+", "-", "*", "/", "(", ")", "==", "!=", "<=", ">=", "<", ">", NULL,
+    "+",  "-",  "*",  "/",  "(", ")",  // 四則演算
+    "==", "!=", "<=", ">=", "<", ">",  // 比較演算子
+    "=",  ";",                         // 代入, 文末
+    NULL,                              // 番兵
 };
 
 /**
@@ -27,6 +30,13 @@ void tokenize(char* p) {
     /* 空白文字は無視 */
     if (isspace(*p)) {
       p++;
+      continue;
+    }
+
+    /* 変数 */
+    if ('a' <= *p && *p <= 'z') {
+      cur = new_token(TK_IDENT, cur, p++);
+      cur->len = 1;
       continue;
     }
 
@@ -95,17 +105,31 @@ bool consume_if(char* op) {
 }
 
 /**
- * トークンが数のとき、トークンを消費して次に進める
- * そうでなければエラーを報告して終了する。
+ * トークンが識別子のとき、トークンを消費して次に進める
  *
- * @return トークンの数値
+ * @return 消費したトークンの識別子名へのポインタ。
+ *         トークンを消費しなかった場合はNULL。
  */
-int consume_number() {
-  if (token->kind == TK_NUM) {
-    int val = token->val;
-    token = token->next;
-    return val;
-  } else {
-    error(token->str, "数ではありません");
+char* consume_if_ident() {
+  if (token->kind != TK_IDENT) {
+    return NULL;
   }
+  char* name = token->str;
+  token = token->next;
+  return name;
+}
+
+/**
+ * トークンが数のとき、トークンを消費して次に進める
+ *
+ * @return 消費したトークンの数値へのポインタ。
+ *         トークンを消費しなかった場合はNULL。
+ */
+int* consume_if_number() {
+  if (token->kind != TK_NUM) {
+    return NULL;
+  }
+  int* val = &token->val;
+  token = token->next;
+  return val;
 }
