@@ -17,6 +17,7 @@ struct Token {
   Token* next;     // 次のトークン(Link)
   int val;         // 整数トークンの場合、その数値
   char* str;       // トークン文字列
+  int len;         // トークンの長さ(記号)
 };
 
 void tokenize(char* p);
@@ -25,5 +26,5 @@ Token* new_token(TokenKind, Token* prev, char* str);
 extern Token* token;
 
 bool at_eof();
-bool consume_if(char op);
+bool consume_if(char* op);
 int consume_number();

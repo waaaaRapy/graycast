@@ -1,12 +1,17 @@
 #include "token.h"
 
 #include <ctype.h>
+#include <memory.h>
 #include <stdlib.h>
 
 #include "util.h"
 
 /** 現在処理中のトークン */
 Token* token;
+
+char* RESERVED_TOKENS[] = {
+    "+", "-", "*", "/", "(", ")", NULL,
+};
 
 /**
  * 入力をトークナイズし、結果をグローバルに保存する
@@ -19,20 +24,29 @@ void tokenize(char* p) {
   Token* cur = &head;
 
   while (*p) {
-    // 空白文字は無視
+    /* 空白文字は無視 */
     if (isspace(*p)) {
       p++;
       continue;
     }
 
-    // 記号
-    if (*p == '+' || *p == '-' || *p == '*' || *p == '/' || *p == '(' ||
-        *p == ')') {
-      cur = new_token(TK_RESERVED, cur, p++);
+    /* 記号 */
+    char** rsv_token = RESERVED_TOKENS;
+    // 一致するRESERVED_TOKENを探す
+    while (*rsv_token != NULL) {
+      if (start_with(p, *rsv_token)) break;
+      rsv_token++;
+    }
+    // 見つかったら記号トークンを作成
+    if (*rsv_token != NULL) {
+      int len = strlen(*rsv_token);
+      cur = new_token(TK_RESERVED, cur, p);
+      p += len;
+      cur->len = len;
       continue;
     }
 
-    // 数値
+    /* 数値 */
     if (isdigit(*p)) {
       cur = new_token(TK_NUM, cur, p);
       cur->val = strtol(p, &p, 10);
@@ -70,8 +84,9 @@ bool at_eof() { return token->kind == TK_EOF; }
  * @param op 期待している記号
  * @return トークンを消費したかどうか
  */
-bool consume_if(char op) {
-  if (token->kind == TK_RESERVED && *token->str == op) {
+bool consume_if(char* op) {
+  if (token->kind == TK_RESERVED && strlen(op) == token->len &&
+      memcmp(token->str, op, token->len) == 0) {
     token = token->next;
     return true;
   } else {

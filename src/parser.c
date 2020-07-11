@@ -31,9 +31,9 @@ Node* expr() {
   Node* node = mul();
 
   for (;;) {
-    if (consume_if('+')) {
+    if (consume_if("+")) {
       node = new_node(ND_ADD, node, mul());
-    } else if (consume_if('-')) {
+    } else if (consume_if("-")) {
       node = new_node(ND_SUB, node, mul());
     } else {
       return node;
@@ -46,9 +46,9 @@ Node* mul() {
   Node* node = unary();
 
   for (;;) {
-    if (consume_if('*')) {
+    if (consume_if("*")) {
       node = new_node(ND_MUL, node, unary());
-    } else if (consume_if('/')) {
+    } else if (consume_if("/")) {
       node = new_node(ND_DIV, node, unary());
     } else {
       return node;
@@ -58,9 +58,9 @@ Node* mul() {
 
 /** unaryをパース */
 Node* unary() {
-  if (consume_if('+')) {
+  if (consume_if("+")) {
     return primary();
-  } else if (consume_if('-')) {
+  } else if (consume_if("-")) {
     return new_node(ND_SUB, new_node_num(0), primary());
   }
   return primary();
@@ -68,10 +68,10 @@ Node* unary() {
 
 /** primaryをパース */
 Node* primary() {
-  if (consume_if('(')) {
+  if (consume_if("(")) {
     // "(" expr ")" の場合
     Node* node = expr();
-    if (!consume_if(')')) {
+    if (!consume_if(")")) {
       error(token->str, "')'ではありません");
     };
     return node;
