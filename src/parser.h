@@ -2,10 +2,13 @@
 
 /**
  * BNF:
- *  expr    := mul ("+" mul | "-" mul)*
- *  mul     := unary ("*" unary | "/" unary)*
- *  unary   := ("+" | "-")? primary
- *  primary := num | "(" expr ")"
+ *  expr       := equality
+ *  equality   := relational ("==" relational | "!=" relational)*
+ *  relational := add ("<" add | "<=" add | ">" add | ">=" add)*
+ *  add        := mul ("+" mul | "-" mul)*
+ *  mul        := unary ("*" unary | "/" unary)*
+ *  unary      := ("+" | "-")? primary
+ *  primary    := num | "(" expr ")"
  */
 
 #include "token.h"
@@ -17,6 +20,10 @@ typedef enum NodeKind {
   ND_SUB,  // -
   ND_MUL,  // *
   ND_DIV,  // /
+  ND_LT,   // <
+  ND_LE,   // <=
+  ND_EQ,   // ==
+  ND_NEQ,  // !=
   ND_NUM,  // 整数
 } NodeKind;
 
@@ -35,6 +42,9 @@ Node* new_node_num(int val);
 Node* parse();
 
 Node* expr();
+Node* equality();
+Node* relational();
+Node* add();
 Node* mul();
 Node* unary();
 Node* primary();

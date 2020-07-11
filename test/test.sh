@@ -27,4 +27,11 @@ assert "(3+5)/2" 4
 assert "-1+(+1)" 0
 assert "-3*-5" 15
 assert "10--10" 20
+assert "0 == 0" 1
+assert "0 != 0" 0
+assert "0 <= 0" 1
+assert "0 < 0" 0
+assert "0 >= 0" 1
+assert "0 > 0" 0
+assert "(1<2)+(3>4)+(4<=5<=6)+(7>=8)" 2
 echo OK

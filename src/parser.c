@@ -26,8 +26,45 @@ Node* new_node_num(int val) {
 /** グローバルのtokenからASTを構築 */
 Node* parse() { return expr(); }
 
-/** experをパース */
-Node* expr() {
+/** exprをパース */
+Node* expr() { return equality(); }
+
+/** equalityをパース */
+Node* equality() {
+  Node* node = relational();
+
+  for (;;) {
+    if (consume_if("==")) {
+      node = new_node(ND_EQ, node, relational());
+    } else if (consume_if("!=")) {
+      node = new_node(ND_NEQ, node, relational());
+    } else {
+      return node;
+    }
+  }
+}
+
+/** relationalをパース */
+Node* relational() {
+  Node* node = add();
+
+  for (;;) {
+    if (consume_if("<")) {
+      node = new_node(ND_LT, node, add());
+    } else if (consume_if("<=")) {
+      node = new_node(ND_LE, node, add());
+    } else if (consume_if(">")) {
+      node = new_node(ND_LT, add(), node);
+    } else if (consume_if(">=")) {
+      node = new_node(ND_LE, add(), node);
+    } else {
+      return node;
+    }
+  }
+}
+
+/** addをパース */
+Node* add() {
   Node* node = mul();
 
   for (;;) {
