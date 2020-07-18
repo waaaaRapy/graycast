@@ -37,7 +37,7 @@ void generate_leftval(Node* node) {
   }
 
   // 左辺値のアドレス(RBP - node->offset)をスタックにpushする
-  printf("  lea rax, [rbp - %d]\n", node->lvar->offset);
+  printf("  lea rax, [rbp - %d]\n", ((LVar*)node->data)->offset);
   printf("  push rax\n");
 }
 
@@ -46,7 +46,7 @@ void generate(Node* node) {
   switch (node->kind) {
     case ND_NUM:
       // 数値ノードの場合、スタックに値をpushするだけ
-      printf("  push %d\n", node->val);
+      printf("  push %ld\n", (size_t)node->data);
       return;
     case ND_LVAR:
       // ローカル変数の場合、

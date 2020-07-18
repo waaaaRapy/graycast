@@ -41,8 +41,8 @@ struct Node {
   NodeKind kind;  // ノードの種類
   Node* lhs;      // 左辺
   Node* rhs;      // 右辺
-  int val;        // kind = ND_NUM のときの数値
-  LVar* lvar;     // kind = ND_LVAR のとき、ローカル変数情報
+  void* data;     // kind = ND_NUM のとき: 数値
+                  // kind = ND_LVAR のとき: ローカル変数情報
 };
 
 Node* new_node(NodeKind, Node* lhs, Node* rhs);

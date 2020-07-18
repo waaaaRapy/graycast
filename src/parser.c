@@ -21,7 +21,7 @@ Node* new_node(NodeKind kind, Node* lhs, Node* rhs) {
 Node* new_node_num(int val) {
   Node* node = calloc(1, sizeof(Node));
   node->kind = ND_NUM;
-  node->val = val;
+  node->data = (void*)(size_t)val;
   return node;
 }
 
@@ -33,7 +33,7 @@ Node* new_node_num(int val) {
 Node* new_node_lvar(LVar* lvar) {
   Node* node = calloc(1, sizeof(Node));
   node->kind = ND_LVAR;
-  node->lvar = lvar;
+  node->data = lvar;
   return node;
 }
 
