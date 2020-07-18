@@ -1,3 +1,5 @@
+#pragma once
+
 /**
  * @file String => void* のTreeMapを実装
  */
