@@ -36,16 +36,29 @@ typedef enum NodeKind {
 } NodeKind;
 
 /** ASTのノード */
-typedef struct Node Node;
-struct Node {
+typedef union Node Node;
+
+union Node {
   NodeKind kind;  // ノードの種類
-  Node* lhs;      // 左辺
-  Node* rhs;      // 右辺
-  void* data;     // kind = ND_NUM のとき: 数値
-                  // kind = ND_LVAR のとき: ローカル変数情報
+
+  struct Node_Operands {
+    NodeKind kind;  // ノードの種類が2項演算子のとき
+    Node* lhs;      // 左辺
+    Node* rhs;      // 右辺
+  } OP;
+
+  struct Node_Num {
+    NodeKind kind;  // ノードの種類がND_NUMのとき
+    int val;        // 数値
+  } NUM;
+
+  struct Node_Lvar {
+    NodeKind kind;  // ノードの種類がND_LVARのとき
+    LVar* data;     // ローカル変数情報
+  } LVAR;
 };
 
-Node* new_node(NodeKind, Node* lhs, Node* rhs);
+Node* new_node_opd(NodeKind, Node* lhs, Node* rhs);
 Node* new_node_num(int val);
 Node* new_node_lvar(LVar* lvar);
 

@@ -37,7 +37,7 @@ void generate_leftval(Node* node) {
   }
 
   // 左辺値のアドレス(RBP - node->offset)をスタックにpushする
-  printf("  lea rax, [rbp - %d]\n", ((LVar*)node->data)->offset);
+  printf("  lea rax, [rbp - %d]\n", node->LVAR.data->offset);
   printf("  push rax\n");
 }
 
@@ -46,7 +46,7 @@ void generate(Node* node) {
   switch (node->kind) {
     case ND_NUM:
       // 数値ノードの場合、スタックに値をpushするだけ
-      printf("  push %ld\n", (size_t)node->data);
+      printf("  push %d\n", node->NUM.val);
       return;
     case ND_LVAR:
       // ローカル変数の場合、
@@ -60,9 +60,9 @@ void generate(Node* node) {
     case ND_ASSIGN:
       // 代入の場合
       // 1. 左辺値のアドレスをpushする
-      generate_leftval(node->lhs);
+      generate_leftval(node->OP.lhs);
       // 2. 右辺値の値をpushする
-      generate(node->rhs);
+      generate(node->OP.rhs);
       // 3. 左辺値のアドレスに右辺値の値を保存
       printf("  pop rdi\n");
       printf("  pop rax\n");
@@ -73,7 +73,7 @@ void generate(Node* node) {
 
     case ND_RETURN:
       // return の場合
-      generate(node->lhs);
+      generate(node->OP.lhs);
       printf("  pop rax\n");       // 式の結果をpopしておく
       printf("  mov rsp, rbp\n");  // ローカル変数分のスタックを戻す
       printf("  pop rbp\n");       // RBPを復元
@@ -82,8 +82,8 @@ void generate(Node* node) {
   }
 
   // 左辺・右辺を評価してスタックに積む
-  generate(node->lhs);
-  generate(node->rhs);
+  generate(node->OP.lhs);
+  generate(node->OP.rhs);
 
   // スタックからpop
   printf("  pop rdi\n");
