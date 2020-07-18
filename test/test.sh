@@ -42,4 +42,5 @@ assert "return1 = 1; return return1; return 2;" 1
 assert "return 8*12-16;" 80
 assert "a=12; if (3*4 > 2*5) a = a * 2; else a = a / 2; return a;" 24
 assert "a=0; while(a<100) a = a + 1; return a;" 100
+assert "r=12; i=-12; whi=3; return r + i + whi;" 3
 echo OK

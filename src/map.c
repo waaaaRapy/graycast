@@ -8,9 +8,10 @@
 
 Map* map_new() { return calloc(1, sizeof(Map)); }
 
-MapNode* map_node_new(char* key, void* val) {
+MapNode* map_node_new(char* key, size_t len, void* val) {
   MapNode* node = calloc(1, sizeof(MapNode));
   node->key = key;
+  node->len = len;
   node->val = val;
   return node;
 }
@@ -20,10 +21,10 @@ MapNode** map_node_get(MapNode** root, char* key, size_t len) {
   MapNode* p;
   while ((p = *pp) != NULL) {
     int cmp = strncmp(p->key, key, len);
-    if (cmp == 0) {
+    if (cmp == 0 && len == p->len) {
       return pp;
     };
-    pp = cmp < 0 ? &p->left : &p->right;
+    pp = cmp <= 0 ? &p->left : &p->right;
   }
   return pp;
 }
@@ -39,7 +40,7 @@ int map_node_set(MapNode** target, char* key, size_t len, void* val) {
     memcpy(new_key, key, len);
     new_key[len] = 0;
 
-    *target = map_node_new(new_key, val);
+    *target = map_node_new(new_key, len, val);
     return 1;
   }
 }
