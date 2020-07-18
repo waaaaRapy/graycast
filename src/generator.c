@@ -37,7 +37,7 @@ void generate_leftval(Node* node) {
   }
 
   // 左辺値のアドレス(RBP - node->offset)をスタックにpushする
-  printf("  lea rax, [rbp - %d]\n", node->offset);
+  printf("  lea rax, [rbp - %d]\n", node->lvar->offset);
   printf("  push rax\n");
 }
 

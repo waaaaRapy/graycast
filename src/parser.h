@@ -42,11 +42,12 @@ struct Node {
   Node* lhs;      // 左辺
   Node* rhs;      // 右辺
   int val;        // kind = ND_NUM のときの数値
-  int offset;     // kind = ND_LVAR のときのRBPからのオフセット
+  LVar* lvar;     // kind = ND_LVAR のとき、ローカル変数情報
 };
 
 Node* new_node(NodeKind, Node* lhs, Node* rhs);
 Node* new_node_num(int val);
+Node* new_node_lvar(LVar* lvar);
 
 Node** parse();
 

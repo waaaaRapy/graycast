@@ -28,12 +28,12 @@ Node* new_node_num(int val) {
 /**
  * 新しいローカル変数ASTノードを作成
 
- * @param offset フレーム内のオフセット
+ * @param lvar ローカル変数情報
  */
-Node* new_node_lvar(int offset) {
+Node* new_node_lvar(LVar* lvar) {
   Node* node = calloc(1, sizeof(Node));
   node->kind = ND_LVAR;
-  node->offset = offset;
+  node->lvar = lvar;
   return node;
 }
 
@@ -172,7 +172,7 @@ Node* primary() {
   Token* tok = consume_if_ident();
   if (tok != NULL) {
     LVar* lvar = LVarStore_load(lvars, tok->str, tok->len);
-    return new_node_lvar(lvar->offset);
+    return new_node_lvar(lvar);
   }
 
   // num の場合
