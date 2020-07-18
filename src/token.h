@@ -30,6 +30,5 @@ extern Token* token;
 
 bool at_eof();
 bool consume_if(char* op);
-bool consume_if_type_is(TokenKind kind);
-Token* consume_if_ident();
+Token* consume_if_type_is(TokenKind kind);
 int* consume_if_number();

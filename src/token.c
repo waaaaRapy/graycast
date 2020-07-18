@@ -133,23 +133,8 @@ bool consume_if(char* op) {
  * @param kind 期待しているトークンの種類
  * @return トークンを消費したかどうか
  */
-bool consume_if_type_is(TokenKind kind) {
-  if (token->kind == kind) {
-    token = token->next;
-    return true;
-  } else {
-    return false;
-  }
-}
-
-/**
- * トークンが識別子のとき、トークンを消費して次に進める
- *
- * @return 消費したトークンの識別子名へのポインタ。
- *         トークンを消費しなかった場合はNULL。
- */
-Token* consume_if_ident() {
-  if (token->kind != TK_IDENT) {
+Token* consume_if_type_is(TokenKind kind) {
+  if (token->kind != kind) {
     return NULL;
   }
   Token* prev = token;

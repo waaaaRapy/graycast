@@ -169,7 +169,7 @@ Node* primary() {
   }
 
   // ident の場合
-  Token* tok = consume_if_ident();
+  Token* tok = consume_if_type_is(TK_IDENT);
   if (tok != NULL) {
     LVar* lvar = LVarStore_load(lvars, tok->str, tok->len);
     return new_node_lvar(lvar);
