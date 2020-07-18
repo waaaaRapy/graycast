@@ -10,6 +10,8 @@ typedef enum TokenKind {
   TK_NUM,       // 整数トークン
 
   TK_RETURN,  // return
+  TK_IF,      // if
+  TK_ELSE,    // else
 } TokenKind;
 
 typedef struct Token Token;
@@ -30,5 +32,6 @@ extern Token* token;
 
 bool at_eof();
 bool consume_if(char* op);
+void expect(char* op);
 Token* consume_if_type_is(TokenKind kind);
 int* consume_if_number();

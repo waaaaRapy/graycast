@@ -43,6 +43,9 @@ void generate_leftval(Node* node) {
 
 /** AST nodeを評価してスタックに積むコードを生成 */
 void generate(Node* node) {
+  static int label_count = 0;
+  int label;
+
   switch (node->kind) {
     case ND_NUM:
       // 数値ノードの場合、スタックに値をpushするだけ
@@ -78,6 +81,27 @@ void generate(Node* node) {
       printf("  mov rsp, rbp\n");  // ローカル変数分のスタックを戻す
       printf("  pop rbp\n");       // RBPを復元
       printf("  ret\n");           // RAXに残っている値を返す
+      return;
+
+    case ND_IFELSE:
+      // if文の場合
+      label = label_count++;
+      generate(node->IF.cond);   // condを評価
+      printf("  pop rax\n");     // 結果をpop
+      printf("  cmp rax, 0\n");  // フラグを設定
+      if (node->IF.else_body == NULL) {
+        // else節がないとき
+        printf("  je  .Lend%03d\n", label);  // cond==0 なら終わりにジャンプ
+        generate(node->IF.if_body);          // if節を実行
+      } else {
+        // else節があるとき
+        printf("  je  .Lelse%03d\n", label);  // cond==0 ならelse節にジャンプ
+        generate(node->IF.if_body);           // if節を実行
+        printf("  jmp .Lend%03d\n", label);  // if文の終わりにジャンプ
+        printf(".Lelse%03d:\n", label);      // else節の始まりのラベル
+        generate(node->IF.else_body);        // else節を実行
+      }
+      printf(".Lend%03d:\n", label);  // if文の終わりのラベル
       return;
   }
 

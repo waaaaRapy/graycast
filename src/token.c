@@ -20,6 +20,8 @@ char* RESERVED_TOKENS[] = {
 Map* gen_keywords_map() {
   Map* map = map_new();
   map_set(map, "return", 6, (void*)TK_RETURN);
+  map_set(map, "if", 2, (void*)TK_IF);
+  map_set(map, "else", 4, (void*)TK_ELSE);
 }
 
 /**
@@ -124,6 +126,18 @@ bool consume_if(char* op) {
     return true;
   } else {
     return false;
+  }
+}
+
+/**
+ * トークンが期待している記号のとき、トークンを消費して次に進める。
+ * それ以外の場合はエラーを報告して終了する。
+ *
+ * @param op 期待している記号
+ */
+void expect(char* op) {
+  if (!consume_if(op)) {
+    error(token->str, "'%s'が期待されています", op);
   }
 }
 

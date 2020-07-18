@@ -7,6 +7,15 @@
 /**
  * 新しいASTノードを生成
  */
+Node* new_node(NodeKind kind) {
+  Node* node = calloc(1, sizeof(Node));
+  node->kind = kind;
+  return node;
+}
+
+/**
+ * 新しい2項ASTノードを生成
+ */
 Node* new_node_opd(NodeKind kind, Node* lhs, Node* rhs) {
   Node* node = calloc(1, sizeof(Node));
   node->kind = kind;
@@ -58,19 +67,34 @@ Node** program() {
 }
 
 /**
- * stmt := (exper | "return" expr) ";"
+ *  stmt := exper ";"
+ *         | "return" expr ";"
+ *         | "if" "(" expr ")" stmt ("else" stmt)?
  */
 Node* stmt() {
-  Node* node;
+  // return文のとき
   if (consume_if_type_is(TK_RETURN)) {
-    node = new_node_opd(ND_RETURN, expr(), NULL);
-  } else {
-    node = expr();
+    Node* node = new_node_opd(ND_RETURN, expr(), NULL);
+    expect(";");
+    return node;
   }
 
-  if (!consume_if(";")) {
-    error(token->str, "';'ではありません");
+  // if文のとき
+  if (consume_if_type_is(TK_IF)) {
+    Node* node = new_node(ND_IFELSE);
+    expect("(");
+    node->IF.cond = expr();
+    expect(")");
+    node->IF.if_body = stmt();
+    if (consume_if_type_is(TK_ELSE)) {
+      node->IF.else_body = stmt();
+    }
+    return node;
   }
+
+  // exprのとき
+  Node* node = expr();
+  expect(";");
   return node;
 }
 
@@ -182,9 +206,7 @@ Node* primary() {
   // "(" expr ")" の場合
   if (consume_if("(")) {
     Node* node = expr();
-    if (!consume_if(")")) {
-      error(token->str, "')'ではありません");
-    };
+    expect(")");
     return node;
   }
 

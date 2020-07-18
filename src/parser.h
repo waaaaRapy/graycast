@@ -3,7 +3,9 @@
 /**
  * BNF:
  *  program    := stmt*
- *  stmt       := (exper | "return" expr) ";"
+ *  stmt       := exper ";"
+ *               | "return" expr ";"
+ *               | "if" "(" expr ")" stmt ("else" stmt)?
  *  expr       := assign
  *  assign     := equality ("=" assign)?
  *  equality   := relational ("==" relational | "!=" relational)*
@@ -33,6 +35,7 @@ typedef enum NodeKind {
   ND_NUM,     // 整数
 
   ND_RETURN,  // return
+  ND_IFELSE,  // if-else
 } NodeKind;
 
 /** ASTのノード */
@@ -56,6 +59,13 @@ union Node {
     NodeKind kind;  // ノードの種類がND_LVARのとき
     LVar* data;     // ローカル変数情報
   } LVAR;
+
+  struct Node_If {
+    NodeKind kind;    // ノードの種類がND_IFのとき
+    Node* cond;       // 分岐条件
+    Node* if_body;    // condのときに実行する文
+    Node* else_body;  // !condのときに実行する文
+  } IF;
 };
 
 Node* new_node_opd(NodeKind, Node* lhs, Node* rhs);
