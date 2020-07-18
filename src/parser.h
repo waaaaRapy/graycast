@@ -6,6 +6,7 @@
  *  stmt       := exper ";"
  *               | "return" expr ";"
  *               | "if" "(" expr ")" stmt ("else" stmt)?
+ *               | "while" "(" expr ")" stmt
  *  expr       := assign
  *  assign     := equality ("=" assign)?
  *  equality   := relational ("==" relational | "!=" relational)*
@@ -36,6 +37,7 @@ typedef enum NodeKind {
 
   ND_RETURN,  // return
   ND_IFELSE,  // if-else
+  ND_WHILE,   // while
 } NodeKind;
 
 /** ASTのノード */
@@ -66,6 +68,12 @@ union Node {
     Node* if_body;    // condのときに実行する文
     Node* else_body;  // !condのときに実行する文
   } IF;
+
+  struct Node_While {
+    NodeKind kind;  // ノードの種類がND_IFのとき
+    Node* cond;     // ループ条件
+    Node* body;     // condの間くりかえし実行する文
+  } WHILE;
 };
 
 Node* new_node_opd(NodeKind, Node* lhs, Node* rhs);

@@ -70,6 +70,7 @@ Node** program() {
  *  stmt := exper ";"
  *         | "return" expr ";"
  *         | "if" "(" expr ")" stmt ("else" stmt)?
+ *         | "while" "(" expr ")" stmt
  */
 Node* stmt() {
   // return文のとき
@@ -89,6 +90,16 @@ Node* stmt() {
     if (consume_if_type_is(TK_ELSE)) {
       node->IF.else_body = stmt();
     }
+    return node;
+  }
+
+  // while文のとき
+  if (consume_if_type_is(TK_WHILE)) {
+    Node* node = new_node(ND_WHILE);
+    expect("(");
+    node->WHILE.cond = expr();
+    expect(")");
+    node->WHILE.body = stmt();
     return node;
   }
 

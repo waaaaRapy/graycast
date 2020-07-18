@@ -103,6 +103,19 @@ void generate(Node* node) {
       }
       printf(".Lend%03d:\n", label);  // if文の終わりのラベル
       return;
+
+    case ND_WHILE:
+      // while文の場合
+      label = label_count++;
+      printf(".Lbegin%03d:\n", label);  // while文の始まりのラベル
+      generate(node->WHILE.cond);       // condを評価
+      printf("  pop rax\n");            // 結果をpop
+      printf("  cmp rax, 0\n");         // フラグを設定
+      printf("  je  .Lend%03d\n", label);  // cond==0 なら終わりにジャンプ
+      generate(node->WHILE.body);          // bodyを実行
+      printf("  jmp .Lbegin%03d\n", label);  // while文の始まりにジャンプ
+      printf(".Lend%03d:\n", label);         // while文の終わりのラベル
+      return;
   }
 
   // 左辺・右辺を評価してスタックに積む
