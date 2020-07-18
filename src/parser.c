@@ -43,7 +43,9 @@ LVarStore* lvars;
 /** グローバルのtokenからASTを構築 */
 Node** parse() { return program(); }
 
-/** programをパースする */
+/**
+ *  program := stmt*
+ */
 Node** program() {
   List* codes = list_new(0);
   lvars = LVarStore_new();
@@ -55,7 +57,9 @@ Node** program() {
   return (Node**)codes->array;
 }
 
-/** stmtをパース */
+/**
+ * stmt := (exper | "return" expr) ";"
+ */
 Node* stmt() {
   Node* node;
   if (consume_if_type_is(TK_RETURN)) {
@@ -70,10 +74,14 @@ Node* stmt() {
   return node;
 }
 
-/** exprをパース */
+/**
+ *  expr := assign
+ */
 Node* expr() { return assign(); }
 
-/** assignをパース */
+/**
+ *  assign := equality ("=" assign)?
+ */
 Node* assign() {
   Node* node = equality();
   if (consume_if("=")) {
@@ -83,7 +91,9 @@ Node* assign() {
   }
 }
 
-/** equalityをパース */
+/**
+ *  equality := relational ("==" relational | "!=" relational)*
+ */
 Node* equality() {
   Node* node = relational();
 
@@ -98,7 +108,9 @@ Node* equality() {
   }
 }
 
-/** relationalをパース */
+/**
+ *  relational := add ("<" add | "<=" add | ">" add | ">=" add)*
+ */
 Node* relational() {
   Node* node = add();
 
@@ -117,7 +129,9 @@ Node* relational() {
   }
 }
 
-/** addをパース */
+/**
+ *  add := mul ("+" mul | "-" mul)*
+ */
 Node* add() {
   Node* node = mul();
 
@@ -132,7 +146,9 @@ Node* add() {
   }
 }
 
-/** mulをパース */
+/**
+ *  mul := unary ("*" unary | "/" unary)*
+ */
 Node* mul() {
   Node* node = unary();
 
@@ -147,7 +163,9 @@ Node* mul() {
   }
 }
 
-/** unaryをパース */
+/**
+ *  unary := ("+" | "-")? primary
+ */
 Node* unary() {
   if (consume_if("+")) {
     return primary();
@@ -157,7 +175,9 @@ Node* unary() {
   return primary();
 }
 
-/** primaryをパース */
+/**
+ *  primary := `num` | `ident` | "(" expr ")"
+ */
 Node* primary() {
   // "(" expr ")" の場合
   if (consume_if("(")) {
