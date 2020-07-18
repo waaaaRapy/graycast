@@ -36,4 +36,6 @@ assert "0 > 0;" 0
 assert "(1<2)+(3>4)+(4<=5<=6)+(7>=8);" 2
 assert "a=12; b=5; a-b+3;" 10
 assert "a=b=c=5; z=a*(b+c); z==a*b+a*c;" 1
+assert "a=12; aa=5; a-aa+3;" 10
+assert "a=A=a_=5; A2=a*(A+a_); A2==a*A+a*a_;" 1
 echo OK

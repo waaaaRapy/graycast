@@ -28,14 +28,17 @@ Node* new_node_num(int val) {
 /**
  * 新しいローカル変数ASTノードを作成
 
- * @param name 変数名
+ * @param offset フレーム内のオフセット
  */
-Node* new_node_lvar(char name) {
+Node* new_node_lvar(int offset) {
   Node* node = calloc(1, sizeof(Node));
   node->kind = ND_LVAR;
-  node->offset = (name - 'a' + 1) * 8;
+  node->offset = offset;
   return node;
 }
+
+/** ローカル変数を記録する変数 */
+LVarStore* lvars;
 
 /** グローバルのtokenからASTを構築 */
 Node** parse() { return program(); }
@@ -43,6 +46,7 @@ Node** parse() { return program(); }
 /** programをパースする */
 Node** program() {
   List* codes = list_new(0);
+  lvars = LVarStore_new();
 
   while (!at_eof()) {
     list_add(codes, stmt());
@@ -160,9 +164,10 @@ Node* primary() {
   }
 
   // ident の場合
-  char* name = consume_if_ident();
-  if (name != NULL) {
-    return new_node_lvar(*name);
+  Token* tok = consume_if_ident();
+  if (tok != NULL) {
+    LVar* lvar = LVarStore_load(lvars, tok->str, tok->len);
+    return new_node_lvar(lvar->offset);
   }
 
   // num の場合

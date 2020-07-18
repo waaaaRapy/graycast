@@ -14,6 +14,7 @@
  *  primary    := num | ident | "(" expr ")"
  */
 
+#include "local_var.h"
 #include "token.h"
 #include "util.h"
 
@@ -46,6 +47,8 @@ Node* new_node(NodeKind, Node* lhs, Node* rhs);
 Node* new_node_num(int val);
 
 Node** parse();
+
+extern LVarStore* lvars;
 
 Node** program();
 Node* stmt();

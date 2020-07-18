@@ -28,5 +28,5 @@ extern Token* token;
 
 bool at_eof();
 bool consume_if(char* op);
-char* consume_if_ident();
+Token* consume_if_ident();
 int* consume_if_number();

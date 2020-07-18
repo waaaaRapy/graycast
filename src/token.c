@@ -34,9 +34,13 @@ void tokenize(char* p) {
     }
 
     /* 変数 */
-    if ('a' <= *p && *p <= 'z') {
-      cur = new_token(TK_IDENT, cur, p++);
-      cur->len = 1;
+    // [a-zA-Z_][a-zA-Z0-9_]* に一致する部分を読み込む
+    if (isalpha(*p) || *p == '_') {
+      char* tmp = p + 1;
+      while (isalnum(*tmp) || *tmp == '_') tmp++;
+      cur = new_token(TK_IDENT, cur, p);
+      cur->len = tmp - p;
+      p = tmp;
       continue;
     }
 
@@ -110,13 +114,13 @@ bool consume_if(char* op) {
  * @return 消費したトークンの識別子名へのポインタ。
  *         トークンを消費しなかった場合はNULL。
  */
-char* consume_if_ident() {
+Token* consume_if_ident() {
   if (token->kind != TK_IDENT) {
     return NULL;
   }
-  char* name = token->str;
+  Token* prev = token;
   token = token->next;
-  return name;
+  return prev;
 }
 
 /**

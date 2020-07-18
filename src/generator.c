@@ -1,5 +1,7 @@
 #include "generator.h"
 
+#include "parser.h"
+
 /** ASTからコードを生成する */
 void generate_main(Node** ast) {
   printf(".intel_syntax noprefix\n");
@@ -11,9 +13,10 @@ void generate_main(Node** ast) {
 void generate_function(char* name, Node** codes) {
   printf("%s:\n", name);
   // プロローグ
-  printf("  push rbp\n");             // 開始時点のRBPを退避
-  printf("  mov rbp, rsp\n");         // 関数内でのRBPを設定
-  printf("  sub rsp, %d\n", 8 * 26);  // ローカル変数26個分の領域を確保
+  printf("  push rbp\n");      // 開始時点のRBPを退避
+  printf("  mov rbp, rsp\n");  // 関数内でのRBPを設定
+  printf("  sub rsp, %d\n",
+         lvars->total_offset);  // ローカル変数の領域を確保
 
   // 本体のコード生成
   for (Node** code = codes; *code != NULL; code++) {
