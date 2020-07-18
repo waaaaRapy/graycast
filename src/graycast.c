@@ -18,9 +18,9 @@ int main(int argc, char** argv) {
   // トークナイズする
   tokenize(argv[1]);
   // 抽象構文木を生成
-  Node** codes = parse();
+  Node* ast = parse();
   // コードを生成
-  generate_main(codes);
+  generate_main(ast);
 
   return 0;
 }

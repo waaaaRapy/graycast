@@ -3,14 +3,30 @@
 #include "parser.h"
 
 /** ASTからコードを生成する */
-void generate_main(Node** ast) {
+void generate_main(Node* ast) {
   printf(".intel_syntax noprefix\n");
   printf(".globl main\n");
   generate_function("main", ast);
 }
 
+/** ブロックのコードを生成 */
+void generate_block(Node* node) {
+  printf("# == BLOCK == \n");
+  Node** codes = (Node**)node->BLOCK.stmts->array;
+  // 本体のコード生成
+  for (Node** code = codes; *code != NULL; code++) {
+    generate(*code);
+    printf("  pop rax  # end of stmt\n");  // 式の結果をpopしておく
+  }
+  printf("# == END BLOCK == \n");
+}
+
 /** 関数のコードを生成する */
-void generate_function(char* name, Node** codes) {
+void generate_function(char* name, Node* body) {
+  if (body->kind != ND_BLOCK) {
+    error(NULL, "ブロックではありません。");
+  }
+
   printf("%s:\n", name);
   // プロローグ
   printf("  push rbp\n");      // 開始時点のRBPを退避
@@ -18,11 +34,7 @@ void generate_function(char* name, Node** codes) {
   printf("  sub rsp, %d\n",
          lvars->total_offset);  // ローカル変数の領域を確保
 
-  // 本体のコード生成
-  for (Node** code = codes; *code != NULL; code++) {
-    generate(*code);
-    printf("  pop rax\n");  // 式の結果をpopしておく
-  }
+  generate_block(body);
 
   // エピローグ
   printf("  mov rsp, rbp\n");  // ローカル変数分のスタックを戻す
@@ -115,6 +127,10 @@ void generate(Node* node) {
       generate(node->WHILE.body);          // bodyを実行
       printf("  jmp .Lbegin%03d\n", label);  // while文の始まりにジャンプ
       printf(".Lend%03d:\n", label);         // while文の終わりのラベル
+      return;
+
+    case ND_BLOCK:
+      generate_block(node);
       return;
   }
 

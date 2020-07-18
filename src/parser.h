@@ -4,6 +4,7 @@
  * BNF:
  *  program    := stmt*
  *  stmt       := exper ";"
+ *               | "{" stmt* "}"
  *               | "return" expr ";"
  *               | "if" "(" expr ")" stmt ("else" stmt)?
  *               | "while" "(" expr ")" stmt
@@ -17,6 +18,7 @@
  *  primary    := num | ident | "(" expr ")"
  */
 
+#include "list.h"
 #include "local_var.h"
 #include "token.h"
 #include "util.h"
@@ -35,6 +37,7 @@ typedef enum NodeKind {
   ND_LVAR,    // ローカル変数
   ND_NUM,     // 整数
 
+  ND_BLOCK,   // ブロック
   ND_RETURN,  // return
   ND_IFELSE,  // if-else
   ND_WHILE,   // while
@@ -62,6 +65,11 @@ union Node {
     LVar* data;     // ローカル変数情報
   } LVAR;
 
+  struct Node_Block {
+    NodeKind kind;  // ノードの種類がND_LVARのとき
+    List* stmts;    // 文のリスト
+  } BLOCK;
+
   struct Node_If {
     NodeKind kind;    // ノードの種類がND_IFのとき
     Node* cond;       // 分岐条件
@@ -80,11 +88,11 @@ Node* new_node_opd(NodeKind, Node* lhs, Node* rhs);
 Node* new_node_num(int val);
 Node* new_node_lvar(LVar* lvar);
 
-Node** parse();
+Node* parse();
 
 extern LVarStore* lvars;
 
-Node** program();
+Node* program();
 Node* stmt();
 Node* expr();
 Node* assign();

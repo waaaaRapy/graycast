@@ -46,33 +46,52 @@ Node* new_node_lvar(LVar* lvar) {
   return node;
 }
 
+/**
+ * 新しいブロックASTノードを生成
+ */
+Node* new_node_block() {
+  Node* node = calloc(1, sizeof(Node));
+  node->kind = ND_BLOCK;
+  node->BLOCK.stmts = list_new(0);
+  return node;
+}
+
 /** ローカル変数を記録する変数 */
 LVarStore* lvars;
 
 /** グローバルのtokenからASTを構築 */
-Node** parse() { return program(); }
+Node* parse() { return program(); }
 
 /**
  *  program := stmt*
  */
-Node** program() {
-  List* codes = list_new(0);
+Node* program() {
+  Node* node = new_node_block();
   lvars = LVarStore_new();
 
   while (!at_eof()) {
-    list_add(codes, stmt());
+    list_add(node->BLOCK.stmts, stmt());
   }
 
-  return (Node**)codes->array;
+  return node;
 }
 
 /**
  *  stmt := exper ";"
+ *         | "{" stmt* "}"
  *         | "return" expr ";"
  *         | "if" "(" expr ")" stmt ("else" stmt)?
  *         | "while" "(" expr ")" stmt
  */
 Node* stmt() {
+  if (consume_if("{")) {
+    Node* node = new_node_block();
+    while (!consume_if("}")) {
+      list_add(node->BLOCK.stmts, stmt());
+    }
+    return node;
+  }
+
   // return文のとき
   if (consume_if_type_is(TK_RETURN)) {
     Node* node = new_node_opd(ND_RETURN, expr(), NULL);
