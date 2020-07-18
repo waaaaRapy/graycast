@@ -82,8 +82,10 @@ Node* program() {
  *         | "return" expr ";"
  *         | "if" "(" expr ")" stmt ("else" stmt)?
  *         | "while" "(" expr ")" stmt
+ *         | "for" "(" expr ";" expr ";" expr ")" stmt
  */
 Node* stmt() {
+  // ブロックのとき
   if (consume_if("{")) {
     Node* node = new_node_block();
     while (!consume_if("}")) {
@@ -119,6 +121,30 @@ Node* stmt() {
     node->WHILE.cond = expr();
     expect(")");
     node->WHILE.body = stmt();
+    return node;
+  }
+
+  // for文のとき
+  if (consume_if_type_is(TK_FOR)) {
+    // for(prepare;cond;next) body として読み込む
+    expect("(");
+    Node* prepare = expr();
+    expect(";");
+    Node* cond = expr();
+    expect(";");
+    Node* next = expr();
+    expect(")");
+    Node* body = stmt();
+
+    // { prepare; while(cond) {body; next;} } として出力する
+    Node* node = new_node_block();
+    list_add(node->BLOCK.stmts, prepare);
+    Node* w = new_node(ND_WHILE);
+    list_add(node->BLOCK.stmts, w);
+    w->WHILE.cond = cond;
+    w->WHILE.body = new_node_block();
+    list_add(w->WHILE.body->BLOCK.stmts, body);
+    list_add(w->WHILE.body->BLOCK.stmts, next);
     return node;
   }
 

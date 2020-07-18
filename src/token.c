@@ -23,6 +23,7 @@ Map* gen_keywords_map() {
   map_set(map, "if", 2, (void*)TK_IF);
   map_set(map, "else", 4, (void*)TK_ELSE);
   map_set(map, "while", 5, (void*)TK_WHILE);
+  map_set(map, "for", 3, (void*)TK_FOR);
 }
 
 /**

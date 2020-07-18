@@ -8,6 +8,7 @@
  *               | "return" expr ";"
  *               | "if" "(" expr ")" stmt ("else" stmt)?
  *               | "while" "(" expr ")" stmt
+ *               | "for" "(" expr ";" expr ";" expr ")" stmt
  *  expr       := assign
  *  assign     := equality ("=" assign)?
  *  equality   := relational ("==" relational | "!=" relational)*
@@ -82,6 +83,14 @@ union Node {
     Node* cond;     // ループ条件
     Node* body;     // condの間くりかえし実行する文
   } WHILE;
+
+  struct Node_For {
+    NodeKind kind;  // ノードの種類がND_IFのとき
+    Node* prepare;  // 初期化部分
+    Node* cond;     // ループ条件
+    Node* next;     //
+    Node* body;     // 繰り返し文
+  } FOR;
 };
 
 Node* new_node_opd(NodeKind, Node* lhs, Node* rhs);

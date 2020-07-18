@@ -16,6 +16,12 @@ void generate_block(Node* node) {
   // 本体のコード生成
   for (Node** code = codes; *code != NULL; code++) {
     generate(*code);
+    switch ((*code)->kind) {
+      case ND_IFELSE:
+      case ND_WHILE:
+      case ND_BLOCK:
+        continue;  // expr 以外のときは pop しない
+    }
     printf("  pop rax  # end of stmt\n");  // 式の結果をpopしておく
   }
   printf("# == END BLOCK == \n");

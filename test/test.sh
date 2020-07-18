@@ -44,4 +44,5 @@ assert "a=12; if (3*4 > 2*5) a = a * 2; else a = a / 2; return a;" 24
 assert "a=0; while(a<100) a = a + 1; return a;" 100
 assert "r=12; i=-12; whi=3; return r + i + whi;" 3
 assert "sum=0; i=0; while(i<=10) {sum = sum + i; i = i + 1;} return sum;" 55
+assert "sum=0; for(i=0; i<=10; i=i+1) sum = sum + i; return sum;" 55
 echo OK
