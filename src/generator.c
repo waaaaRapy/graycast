@@ -73,6 +73,7 @@ void generate(Node* node) {
 
     case ND_RETURN:
       // return の場合
+      generate(node->lhs);
       printf("  pop rax\n");       // 式の結果をpopしておく
       printf("  mov rsp, rbp\n");  // ローカル変数分のスタックを戻す
       printf("  pop rbp\n");       // RBPを復元
