@@ -4,6 +4,7 @@
 #include <memory.h>
 #include <stdlib.h>
 
+#include "map.h"
 #include "util.h"
 
 /** 現在処理中のトークン */
@@ -16,6 +17,11 @@ char* RESERVED_TOKENS[] = {
     NULL,                              // 番兵
 };
 
+Map* gen_keywords_map() {
+  Map* map = map_new();
+  map_set(map, "return", 6, (void*)TK_RETURN);
+}
+
 /**
  * 入力をトークナイズし、結果をグローバルに保存する
  *
@@ -26,6 +32,8 @@ void tokenize(char* p) {
   head.next = NULL;
   Token* cur = &head;
 
+  Map* kwmap = gen_keywords_map();
+
   while (*p) {
     /* 空白文字は無視 */
     if (isspace(*p)) {
@@ -33,14 +41,22 @@ void tokenize(char* p) {
       continue;
     }
 
-    /* 変数 */
-    // [a-zA-Z_][a-zA-Z0-9_]* に一致する部分を読み込む
+    /* 変数 or キーワード */
     if (isalpha(*p) || *p == '_') {
+      // [a-zA-Z_][a-zA-Z0-9_]* に一致する部分を読み込む
       char* tmp = p + 1;
       while (isalnum(*tmp) || *tmp == '_') tmp++;
-      cur = new_token(TK_IDENT, cur, p);
-      cur->len = tmp - p;
-      p = tmp;
+      int len = tmp - p;
+
+      // 読み込んだ部分がキーワードかどうか調べる
+      TokenKind kind = (TokenKind)map_get(kwmap, p, len);
+      if (kind) {
+        cur = new_token(kind, cur, p, len);
+      } else {
+        cur = new_token(TK_IDENT, cur, p, len);
+      }
+
+      p = tmp;  // 読み込んだ分だけ進める
       continue;
     }
 
@@ -54,23 +70,25 @@ void tokenize(char* p) {
     // 見つかったら記号トークンを作成
     if (*rsv_token != NULL) {
       int len = strlen(*rsv_token);
-      cur = new_token(TK_RESERVED, cur, p);
+      cur = new_token(TK_RESERVED, cur, p, len);
       p += len;
-      cur->len = len;
       continue;
     }
 
     /* 数値 */
     if (isdigit(*p)) {
-      cur = new_token(TK_NUM, cur, p);
-      cur->val = strtol(p, &p, 10);
+      char* tmp;
+      int val = strtol(p, &tmp, 10);
+      cur = new_token(TK_NUM, cur, p, tmp - p);
+      cur->val = val;
+      p = tmp;
       continue;
     }
 
     error(p, "トークナイズできません");
   }
 
-  cur = new_token(TK_EOF, cur, p);
+  cur = new_token(TK_EOF, cur, p, 0);
   token = head.next;
 }
 
@@ -81,10 +99,11 @@ void tokenize(char* p) {
  * @param prev prev->nextに作成したトークンが追加される
  * @param str トークンの文字列
  */
-Token* new_token(TokenKind kind, Token* prev, char* str) {
+Token* new_token(TokenKind kind, Token* prev, char* str, int len) {
   Token* token = calloc(1, sizeof(Token));
   token->kind = kind;
   token->str = str;
+  token->len = len;
   prev->next = token;
   return token;
 }
@@ -101,6 +120,21 @@ bool at_eof() { return token->kind == TK_EOF; }
 bool consume_if(char* op) {
   if (token->kind == TK_RESERVED && strlen(op) == token->len &&
       memcmp(token->str, op, token->len) == 0) {
+    token = token->next;
+    return true;
+  } else {
+    return false;
+  }
+}
+
+/**
+ * トークンが期待している種類のとき、トークンを消費して次に進める
+ *
+ * @param kind 期待しているトークンの種類
+ * @return トークンを消費したかどうか
+ */
+bool consume_if_type_is(TokenKind kind) {
+  if (token->kind == kind) {
     token = token->next;
     return true;
   } else {

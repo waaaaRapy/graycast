@@ -3,7 +3,7 @@
 /**
  * BNF:
  *  program    := stmt*
- *  stmt       := exper ";"
+ *  stmt       := (exper | "return" expr) ";"
  *  expr       := assign
  *  assign     := equality ("=" assign)?
  *  equality   := relational ("==" relational | "!=" relational)*
@@ -31,6 +31,8 @@ typedef enum NodeKind {
   ND_ASSIGN,  // 代入("=")
   ND_LVAR,    // ローカル変数
   ND_NUM,     // 整数
+
+  ND_RETURN,  // return
 } NodeKind;
 
 /** ASTのノード */

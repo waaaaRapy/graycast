@@ -57,12 +57,17 @@ Node** program() {
 
 /** stmtをパース */
 Node* stmt() {
-  Node* node = expr();
-  if (consume_if(";")) {
-    return node;
+  Node* node;
+  if (consume_if_type_is(TK_RETURN)) {
+    node = new_node(ND_RETURN, expr(), NULL);
   } else {
+    node = expr();
+  }
+
+  if (!consume_if(";")) {
     error(token->str, "';'ではありません");
   }
+  return node;
 }
 
 /** exprをパース */

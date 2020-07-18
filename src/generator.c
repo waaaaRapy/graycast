@@ -70,6 +70,14 @@ void generate(Node* node) {
       // 4. 代入した値をpush
       printf("  push rdi\n");
       return;
+
+    case ND_RETURN:
+      // return の場合
+      printf("  pop rax\n");       // 式の結果をpopしておく
+      printf("  mov rsp, rbp\n");  // ローカル変数分のスタックを戻す
+      printf("  pop rbp\n");       // RBPを復元
+      printf("  ret\n");           // RAXに残っている値を返す
+      return;
   }
 
   // 左辺・右辺を評価してスタックに積む
