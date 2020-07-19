@@ -160,15 +160,27 @@ Node* stmt() {
 Node* expr() { return assign(); }
 
 /**
- *  assign := equality ("=" assign)?
+ * assign := equality (("=" | "+=" | "-=" | "*=" | "/=") assign)?
  */
 Node* assign() {
   Node* node = equality();
   if (consume_if("=")) {
     node = new_node_opd(ND_ASSIGN, node, assign());
-  } else {
-    return node;
+  } else if (consume_if("+=")) {
+    Node* rightval = new_node_opd(ND_ADD, node, assign());
+    node = new_node_opd(ND_ASSIGN, node, rightval);
+  } else if (consume_if("-=")) {
+    Node* rightval = new_node_opd(ND_SUB, node, assign());
+    node = new_node_opd(ND_ASSIGN, node, rightval);
+  } else if (consume_if("*=")) {
+    Node* rightval = new_node_opd(ND_MUL, node, assign());
+    node = new_node_opd(ND_ASSIGN, node, rightval);
+  } else if (consume_if("/=")) {
+    Node* rightval = new_node_opd(ND_DIV, node, assign());
+    node = new_node_opd(ND_ASSIGN, node, rightval);
   }
+
+  return node;
 }
 
 /**

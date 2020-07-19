@@ -10,7 +10,7 @@
  *               | "while" "(" expr ")" stmt
  *               | "for" "(" expr ";" expr ";" expr ")" stmt
  *  expr       := assign
- *  assign     := equality ("=" assign)?
+ *  assign     := equality ("=" assign | ("+=" | "-=" | "*=" | "/=") assign)?
  *  equality   := relational ("==" relational | "!=" relational)*
  *  relational := add ("<" add | "<=" add | ">" add | ">=" add)*
  *  add        := mul ("+" mul | "-" mul)*
