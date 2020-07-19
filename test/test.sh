@@ -26,7 +26,7 @@ assert "5 * (9-6);" 15
 assert "(3+5)/2;" 4
 assert "-1+(+1);" 0
 assert "-3*-5;" 15
-assert "10--10;" 20
+assert "10- -10;" 20
 assert "0 == 0;" 1
 assert "0 != 0;" 0
 assert "0 <= 0;" 1
@@ -45,4 +45,5 @@ assert "a=0; while(a<100) a = a + 1; return a;" 100
 assert "r=12; i=-12; whi=3; return r + i + whi;" 3
 assert "sum=0; i=0; while(i<=10) {sum = sum + i; i = i + 1;} return sum;" 55
 assert "sum=0; for(i=0; i<=10; i=i+1) sum = sum + i; return sum;" 55
+assert "sum=0; for(i=0; i<=10; ++i) sum = sum + i; return sum;" 55
 echo OK

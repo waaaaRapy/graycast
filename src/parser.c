@@ -244,14 +244,23 @@ Node* mul() {
 }
 
 /**
- *  unary := ("+" | "-")? primary
+ *  unary := ("+" | "-" | "++" | "--")? primary
  */
 Node* unary() {
   if (consume_if("+")) {
     return primary();
   } else if (consume_if("-")) {
     return new_node_opd(ND_SUB, new_node_num(0), primary());
+  } else if (consume_if("++")) {
+    Node* operand = primary();
+    Node* rightval = new_node_opd(ND_ADD, operand, new_node_num(1));
+    return new_node_opd(ND_ASSIGN, operand, rightval);
+  } else if (consume_if("--")) {
+    Node* operand = primary();
+    Node* rightval = new_node_opd(ND_SUB, operand, new_node_num(1));
+    return new_node_opd(ND_ASSIGN, operand, rightval);
   }
+
   return primary();
 }
 
