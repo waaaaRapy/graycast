@@ -196,6 +196,11 @@ void generate(Node* node) {
       //   RDX <- [RDX:RAX] % op1
       printf("  idiv rdi\n");
       break;
+    case ND_MOD:
+      printf("  cqo\n");
+      printf("  idiv rdi\n");
+      printf("  mov rax, rdx\n");
+      break;
 
     case ND_EQ:
       printf("  cmp rax, rdi\n");

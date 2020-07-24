@@ -235,7 +235,7 @@ Node* add() {
 }
 
 /**
- *  mul := unary ("*" unary | "/" unary)*
+ * mul := unary ("*" unary | "/" unary | "%" unary)*
  */
 Node* mul() {
   Node* node = unary();
@@ -245,6 +245,8 @@ Node* mul() {
       node = new_node_opd(ND_MUL, node, unary());
     } else if (consume_if("/")) {
       node = new_node_opd(ND_DIV, node, unary());
+    } else if (consume_if("%")) {
+      node = new_node_opd(ND_MOD, node, unary());
     } else {
       return node;
     }

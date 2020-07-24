@@ -11,6 +11,7 @@ typedef enum NodeKind {
   ND_SUB,     // 減算("-")
   ND_MUL,     // 乗算("*")
   ND_DIV,     // 除算("/")
+  ND_MOD,     // 剰余("%")
   ND_LT,      // 比較("<")
   ND_LE,      // 比較("<=")
   ND_EQ,      // 比較("==")
