@@ -56,6 +56,18 @@ Node* new_node_block() {
   return node;
 }
 
+/**
+ * 新しい関数呼び出しASTノードを生成
+ */
+Node* new_node_call(char* name, size_t len) {
+  Node* node = calloc(1, sizeof(Node));
+  node->kind = ND_CALL;
+  node->CALL.name = name;
+  node->CALL.len = len;
+  node->CALL.args = list_new(0);
+  return node;
+}
+
 /** ローカル変数を記録する変数 */
 LVarStore* lvars;
 
@@ -277,7 +289,10 @@ Node* unary() {
 }
 
 /**
- *  primary := `num` | `ident` | "(" expr ")"
+ * primary := `num`
+ *          | `ident`
+ *          | `ident` "(" (expr ("," expr)*)? ")"
+ *          | "(" expr ")"
  */
 Node* primary() {
   // "(" expr ")" の場合
@@ -290,8 +305,25 @@ Node* primary() {
   // ident の場合
   Token* tok = consume_if_type_is(TK_IDENT);
   if (tok != NULL) {
-    LVar* lvar = LVarStore_load(lvars, tok->str, tok->len);
-    return new_node_lvar(lvar);
+    if (consume_if("(")) {
+      // 後ろに "(" が続く場合は関数呼び出し
+      Node* node = new_node_call(tok->str, tok->len);
+      if (consume_if(")")) {
+        // 引数なしの場合
+        return node;
+      } else {
+        // 引数ありの場合
+        do {
+          list_add(node->CALL.args, expr());
+        } while (consume_if(","));
+        expect(")");
+        return node;
+      }
+    } else {
+      // そうでなければ変数
+      LVar* lvar = LVarStore_load(lvars, tok->str, tok->len);
+      return new_node_lvar(lvar);
+    }
   }
 
   // num の場合
@@ -301,5 +333,5 @@ Node* primary() {
   }
 
   // その他の場合
-  error(token->str, "変数名または数値が期待されています");
+  error(token->str, "変数名,数値または関数呼び出しが期待されています");
 }

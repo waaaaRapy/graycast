@@ -16,7 +16,10 @@
  *  add        := mul ("+" mul | "-" mul)*
  *  mul        := unary ("*" unary | "/" unary)*
  *  unary      := ("+" | "-" | "++" | "--")? primary
- *  primary    := num | ident | "(" expr ")"
+ *  primary    := `num`
+ *              | `ident`
+ *              | `ident` "(" (expr ("," expr)*)? ")"
+ *              | "(" expr ")"
  */
 
 #include "list.h"
@@ -42,6 +45,7 @@ typedef enum NodeKind {
   ND_RETURN,  // return
   ND_IFELSE,  // if-else
   ND_WHILE,   // while
+  ND_CALL,    // 関数呼び出し
 } NodeKind;
 
 /** ASTのノード */
@@ -91,11 +95,20 @@ union Node {
     Node* next;     //
     Node* body;     // 繰り返し文
   } FOR;
+
+  struct Node_Call {
+    NodeKind kind;  // ノードの種類がND_CALLのとき
+    char* name;     // 呼び出す関数名
+    size_t len;     // nameの長さ
+    List* args;     // 引数ノードのリスト
+  } CALL;
 };
 
 Node* new_node_opd(NodeKind, Node* lhs, Node* rhs);
 Node* new_node_num(int val);
 Node* new_node_lvar(LVar* lvar);
+Node* new_node_block();
+Node* new_node_call(char* name, size_t len);
 
 Node* parse();
 

@@ -101,6 +101,31 @@ void generate(Node* node) {
       printf("  ret\n");           // RAXに残っている値を返す
       return;
 
+    case ND_CALL: {
+      int n = node->CALL.args->len - 1;
+      // 引数を評価
+      for (int i = n; i >= 0; i--) {
+        // 後ろの引数からスタックに積んでいく
+        Node* arg = (Node*)node->CALL.args->array[i];
+        generate(arg);
+      }
+      // 引数をレジスタに格納
+      // http://herumi.in.coocan.jp/prog/x64.html
+      if (n-- >= 0) printf("  pop rdi\n");  // 第1引数
+      if (n-- >= 0) printf("  pop rsi\n");  // 第2引数
+      if (n-- >= 0) printf("  pop rdx\n");  // 第3引数
+      if (n-- >= 0) printf("  pop rcx\n");  // 第4引数
+      if (n-- >= 0) printf("  pop r8\n");   // 第5引数
+      if (n-- >= 0) printf("  pop r9\n");   // 第6引数
+
+      // TODO: スタック(RSP)のアライメント
+
+      // 関数を呼び出す
+      printf("  call %.*s\n", node->CALL.len, node->CALL.name);
+      printf("  push rax\n");
+      return;
+    }
+
     case ND_IFELSE:
       // if文の場合
       label = label_count++;
