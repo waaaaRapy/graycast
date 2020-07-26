@@ -167,6 +167,47 @@ void generate(Node* node) {
     case ND_BLOCK:
       generate_block(node);
       return;
+
+    case ND_L_OR:
+      // a || b のとき a ? 1 : (b ? 1 : 0) を計算
+      label = label_count++;
+
+      generate(node->OP.lhs);  // aを評価
+      printf("  pop rax\n");
+      printf("  cmp rax, 0\n");             // a と 0 を比較
+      printf("  jne .Ltrue%03d\n", label);  // a!=0 なら true へ
+
+      generate(node->OP.rhs);  // bを評価
+      printf("  pop rax\n");
+      printf("  cmp rax, 0\n");           // b と 0 を比較
+      printf("  je .Lend%03d\n", label);  // b==0 のとき raxは0なのでendへ
+
+      printf(".Ltrue%03d:\n", label);  // trueのときの処理
+      printf("  mov rax, 1\n");        // 1を返す
+
+      printf(".Lend%03d:\n", label);
+      printf("  push rax\n");
+      return;
+
+    case ND_L_AND:
+      // a && b のとき a ? (b ? 1 : 0) : 0 を計算
+      label = label_count++;
+
+      generate(node->OP.lhs);  // aを評価
+      printf("  pop rax\n");
+      printf("  cmp rax, 0\n");  // a と 0 を比較
+      printf("  je .Lend%03d\n", label);  // a==0 なら raxは0なのでそのままendへ
+
+      generate(node->OP.rhs);  // bを評価
+      printf("  pop rax\n");
+      printf("  cmp rax, 0\n");  // b と 0 を比較
+      printf("  je .Lend%03d\n", label);  // b==0 なら raxは0なのでそのままendへ
+
+      printf("  mov rax, 1\n");  // 1を返す
+
+      printf(".Lend%03d:\n", label);
+      printf("  push rax\n");
+      return;
   }
 
   // 左辺・右辺を評価してスタックに積む

@@ -17,6 +17,11 @@ typedef enum NodeKind {
   ND_EQ,      // 比較("==")
   ND_NEQ,     // 比較("!=")
   ND_ASSIGN,  // 代入("=")
+  ND_L_OR,    // 論理和("||")
+  ND_L_AND,   // 論理積("&&")
+  ND_B_OR,    // ビットOR("|")
+  ND_B_XOR,   // ビットXOR("^")
+  ND_B_AND,   // ビットAND("&")
   ND_LVAR,    // ローカル変数
   ND_NUM,     // 整数
 

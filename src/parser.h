@@ -11,7 +11,12 @@
  *               | "while" "(" expr ")" stmt
  *               | "for" "(" expr ";" expr ";" expr ")" stmt
  *  expr       := assign
- *  assign     := equality ("=" assign | ("+=" | "-=" | "*=" | "/=") assign)?
+ *  assign     := logic_or (("=" | "+=" | "-=" | "*=" | "/=") assign)?
+ *  logic_or   := logic_and ("||" logic_and)*
+ *  logic_and  := bit_or ("&&" bit_or)*
+ *  bit_or     := bit_xor ("|" bit_xor)*
+ *  bit_xor    := bit_and ("^" bit_and)*
+ *  bit_and    := equality ("&" equality)*
  *  equality   := relational ("==" relational | "!=" relational)*
  *  relational := add ("<" add | "<=" add | ">" add | ">=" add)*
  *  add        := mul ("+" mul | "-" mul)*
@@ -46,7 +51,11 @@ Func* func();
 Node* stmt();
 Node* expr();
 Node* assign();
-Node* expr();
+Node* logic_or();
+Node* logic_and();
+Node* bit_or();
+Node* bit_xor();
+Node* bit_and();
 Node* equality();
 Node* relational();
 Node* add();

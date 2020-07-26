@@ -156,10 +156,10 @@ Node* stmt() {
 Node* expr() { return assign(); }
 
 /**
- * assign := equality (("=" | "+=" | "-=" | "*=" | "/=") assign)?
+ * assign := logic_or (("=" | "+=" | "-=" | "*=" | "/=") assign)?
  */
 Node* assign() {
-  Node* node = equality();
+  Node* node = logic_or();
   if (consume_if("=")) {
     node = new_node_opd(ND_ASSIGN, node, assign());
   } else if (consume_if("+=")) {
@@ -177,6 +177,76 @@ Node* assign() {
   }
 
   return node;
+}
+
+/**
+ * logic_or := logic_and ("||" logic_and)*
+ */
+Node* logic_or() {
+  Node* node = logic_and();
+  for (;;) {
+    if (consume_if("||")) {
+      node = new_node_opd(ND_L_OR, node, logic_and());
+    } else {
+      return node;
+    }
+  }
+}
+
+/**
+ * logic_and := bit_or ("&&" bit_or)*
+ */
+Node* logic_and() {
+  Node* node = bit_or();
+  for (;;) {
+    if (consume_if("&&")) {
+      node = new_node_opd(ND_L_AND, node, bit_or());
+    } else {
+      return node;
+    }
+  }
+}
+
+/**
+ * bit_or := bit_xor ("|" bit_xor)*
+ */
+Node* bit_or() {
+  Node* node = bit_xor();
+  for (;;) {
+    if (consume_if("|")) {
+      node = new_node_opd(ND_B_OR, node, bit_xor());
+    } else {
+      return node;
+    }
+  }
+}
+
+/**
+ * bit_xor := bit_and ("^" bit_and)*
+ */
+Node* bit_xor() {
+  Node* node = bit_and();
+  for (;;) {
+    if (consume_if("^")) {
+      node = new_node_opd(ND_B_XOR, node, bit_and());
+    } else {
+      return node;
+    }
+  }
+}
+
+/**
+ * bit_and := equality ("&" equality)*
+ */
+Node* bit_and() {
+  Node* node = equality();
+  for (;;) {
+    if (consume_if("&")) {
+      node = new_node_opd(ND_B_AND, node, equality());
+    } else {
+      return node;
+    }
+  }
 }
 
 /**
