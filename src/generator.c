@@ -3,10 +3,12 @@
 #include "parser.h"
 
 /** ASTからコードを生成する */
-void generate_main(Node* ast) {
+void generate_program(Program* prog) {
   printf(".intel_syntax noprefix\n");
-  printf(".globl main\n");
-  generate_function("main", ast);
+  Func** funcs = (Func**)prog->funcs->array;
+  for (int i = 0; i < prog->funcs->len; i++) {
+    generate_function(funcs[i]);
+  }
 }
 
 /** ブロックのコードを生成 */
@@ -27,20 +29,26 @@ void generate_block(Node* node) {
   printf("# == END BLOCK == \n");
 }
 
-/** 関数のコードを生成する */
-void generate_function(char* name, Node* body) {
-  if (body->kind != ND_BLOCK) {
-    error(NULL, "ブロックではありません。");
-  }
+char* FCALL_REGS[] = {"rdi", "rsi", "rdx", "rcx", "r8", "r9"};
 
-  printf("%s:\n", name);
+/** 関数のコードを生成する */
+void generate_function(Func* func) {
+  printf("\n");
+  printf(".type %.*s, @function\n", func->len, func->name);
+  printf(".global %.*s\n", func->len, func->name);
+  printf("%.*s:\n", func->len, func->name);
   // プロローグ
   printf("  push rbp\n");      // 開始時点のRBPを退避
   printf("  mov rbp, rsp\n");  // 関数内でのRBPを設定
-  printf("  sub rsp, %d\n",
-         lvars->total_offset);  // ローカル変数の領域を確保
+  // 引数をスタックに保存
+  for (int i = 0; i < func->args->len; i++) {
+    printf("  mov [rbp - 0x%02x], %s\n", (i + 1) * 8, FCALL_REGS[i]);
+  }
 
-  generate_block(body);
+  printf("  sub rsp, %d\n",
+         func->lvars->total_offset);  // ローカル変数の領域を確保
+
+  generate_block(func->body);
 
   // エピローグ
   printf("  mov rsp, rbp\n");  // ローカル変数分のスタックを戻す
@@ -55,7 +63,7 @@ void generate_leftval(Node* node) {
   }
 
   // 左辺値のアドレス(RBP - node->offset)をスタックにpushする
-  printf("  lea rax, [rbp - %d]\n", node->LVAR.data->offset);
+  printf("  lea rax, [rbp - 0x%02x]\n", node->LVAR.data->offset);
   printf("  push rax\n");
 }
 
@@ -101,22 +109,19 @@ void generate(Node* node) {
       printf("  ret\n");           // RAXに残っている値を返す
       return;
 
-    case ND_CALL: {
-      int n = node->CALL.args->len - 1;
+    case ND_CALL:
+      // 関数呼び出しの場合
       // 引数を評価
-      for (int i = n; i >= 0; i--) {
+      for (int i = node->CALL.args->len - 1; i >= 0; i--) {
         // 後ろの引数からスタックに積んでいく
         Node* arg = (Node*)node->CALL.args->array[i];
         generate(arg);
       }
       // 引数をレジスタに格納
       // http://herumi.in.coocan.jp/prog/x64.html
-      if (n-- >= 0) printf("  pop rdi\n");  // 第1引数
-      if (n-- >= 0) printf("  pop rsi\n");  // 第2引数
-      if (n-- >= 0) printf("  pop rdx\n");  // 第3引数
-      if (n-- >= 0) printf("  pop rcx\n");  // 第4引数
-      if (n-- >= 0) printf("  pop r8\n");   // 第5引数
-      if (n-- >= 0) printf("  pop r9\n");   // 第6引数
+      for (int i = 0; i < node->CALL.args->len; i++) {
+        printf("  pop %s\n", FCALL_REGS[i]);
+      }
 
       // TODO: スタック(RSP)のアライメント
 
@@ -124,7 +129,6 @@ void generate(Node* node) {
       printf("  call %.*s\n", node->CALL.len, node->CALL.name);
       printf("  push rax\n");
       return;
-    }
 
     case ND_IFELSE:
       // if文の場合

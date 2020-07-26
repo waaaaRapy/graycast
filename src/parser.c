@@ -3,89 +3,73 @@
 #include <stdlib.h>
 
 #include "list.h"
+#include "node.h"
 
-/**
- * 新しいASTノードを生成
- */
-Node* new_node(NodeKind kind) {
-  Node* node = calloc(1, sizeof(Node));
-  node->kind = kind;
-  return node;
+/** Programのコンストラクタ */
+Program* new_program() {
+  Program* prog = calloc(1, sizeof(Program));
+  prog->funcs = list_new(0);
+  return prog;
 }
 
-/**
- * 新しい2項ASTノードを生成
- */
-Node* new_node_opd(NodeKind kind, Node* lhs, Node* rhs) {
-  Node* node = calloc(1, sizeof(Node));
-  node->kind = kind;
-  node->OP.lhs = lhs;
-  node->OP.rhs = rhs;
-  return node;
+/** Funcのコンストラクタ */
+Func* new_func(char* name, size_t len) {
+  Func* func = calloc(1, sizeof(Func));
+  func->name = name;
+  func->len = len;
+  func->args = list_new(0);
+  func->body = new_node_block();
+  func->lvars = LVarStore_new();
+  return func;
 }
-
-/**
- * 新しい数値ASTノードを作成
- */
-Node* new_node_num(int val) {
-  Node* node = calloc(1, sizeof(Node));
-  node->kind = ND_NUM;
-  node->NUM.val = val;
-  return node;
-}
-
-/**
- * 新しいローカル変数ASTノードを作成
-
- * @param lvar ローカル変数情報
- */
-Node* new_node_lvar(LVar* lvar) {
-  Node* node = calloc(1, sizeof(Node));
-  node->kind = ND_LVAR;
-  node->LVAR.data = lvar;
-  return node;
-}
-
-/**
- * 新しいブロックASTノードを生成
- */
-Node* new_node_block() {
-  Node* node = calloc(1, sizeof(Node));
-  node->kind = ND_BLOCK;
-  node->BLOCK.stmts = list_new(0);
-  return node;
-}
-
-/**
- * 新しい関数呼び出しASTノードを生成
- */
-Node* new_node_call(char* name, size_t len) {
-  Node* node = calloc(1, sizeof(Node));
-  node->kind = ND_CALL;
-  node->CALL.name = name;
-  node->CALL.len = len;
-  node->CALL.args = list_new(0);
-  return node;
-}
-
-/** ローカル変数を記録する変数 */
-LVarStore* lvars;
 
 /** グローバルのtokenからASTを構築 */
-Node* parse() { return program(); }
+Program* parse() { return program(); }
 
 /**
- *  program := stmt*
+ *  program := func*
  */
-Node* program() {
-  Node* node = new_node_block();
-  lvars = LVarStore_new();
-
+Program* program() {
+  Program* prog = new_program();
   while (!at_eof()) {
-    list_add(node->BLOCK.stmts, stmt());
+    list_add(prog->funcs, func());
   }
 
-  return node;
+  return prog;
+}
+
+LVarStore* lvars;
+
+/*
+ * func := `ident` "(" (`ident` ("," `ident`)*)? ")" "{" stmt* "}"
+ */
+Func* func() {
+  // 関数名
+  Token* tok = consume_if_type_is(TK_IDENT);
+  Func* func = new_func(tok->str, tok->len);
+  lvars = func->lvars;
+
+  // 引数
+  expect("(");
+  if (!consume_if(")")) {
+    // 引数ありの場合
+    do {
+      Token* tok = consume_if_type_is(TK_IDENT);
+      if (tok == NULL) {
+        error(token->str, "識別子ではありません");
+      }
+      LVar* lvar = LVarStore_load(func->lvars, tok->str, tok->len);
+      list_add(func->args, lvar);
+    } while (consume_if(","));
+    expect(")");
+  }
+
+  // 本体
+  expect("{");
+  while (!consume_if("}")) {
+    list_add(func->body->BLOCK.stmts, stmt());
+  }
+  return func;
 }
 
 /**
