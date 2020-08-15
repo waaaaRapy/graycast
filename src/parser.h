@@ -21,7 +21,7 @@
  *  relational := add ("<" add | "<=" add | ">" add | ">=" add)*
  *  add        := mul ("+" mul | "-" mul)*
  *  mul        := unary_r ("*" unary_r | "/" unary_r | "%" unary_r)*
- *  unary_r    := ("+" | "-" | "++" | "--")? unary_l
+ *  unary_r    := ("+" | "-" | "++" | "--" | "!" | "~")? unary_l
  *  unary_l    := primary ("++" | "--")?
  *  primary    := `num`
  *              | `ident`

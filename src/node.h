@@ -24,6 +24,7 @@ typedef enum NodeKind {
   ND_B_OR,    // ビットOR("|")
   ND_B_XOR,   // ビットXOR("^")
   ND_B_AND,   // ビットAND("&")
+  ND_B_NOT,   // ビットNOT("~")
   ND_LVAR,    // ローカル変数
   ND_NUM,     // 整数
 

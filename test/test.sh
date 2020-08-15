@@ -57,4 +57,11 @@ assert "main(){a=1; b=2; return a==1 && b==2;}" 1
 assert "main(){a=1; b=2; return a!=1 && b==2;}" 0
 assert "main(){a=1; b=2; return (a==1 && b!=2) + 1;}" 1
 assert "main(){a=1; b=2; return a!=1 && b!=2;}" 0
+assert "main(){return !1;}" 0
+assert "main(){return !0;}" 1
+assert "main(){for(i=0; i<=100; i++) {if (-i != (~i + 1)) return 1;} return 0;}" 0
+assert "main(){return (14 & 20) == 4 && (12 & 41) == 8;}" 1
+assert "main(){return !((14 | 20) == 30 && (12 | 41) == 45);}" 0
+assert "main(){return (14 ^ 20) == 26 && (12 ^ 41) == 37;}" 1
+
 echo OK

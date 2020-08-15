@@ -224,6 +224,13 @@ void generate(Node* node) {
       printf(".Lend%03d:\n", label);
       printf("  push rax\n");
       return;
+
+    case ND_B_NOT:
+      generate(node->OP.lhs);
+      printf("  pop rax\n");
+      printf("  not rax\n");
+      printf("  push rax\n");
+      return;
   }
 
   // 左辺・右辺を評価してスタックに積む
@@ -278,6 +285,16 @@ void generate(Node* node) {
       printf("  cmp rax, rdi\n");
       printf("  setle al\n");
       printf("  movzb rax, al\n");
+      break;
+
+    case ND_B_OR:
+      printf("  or rax, rdi\n");
+      break;
+    case ND_B_XOR:
+      printf("  xor rax, rdi\n");
+      break;
+    case ND_B_AND:
+      printf("  and rax, rdi\n");
       break;
   }
 

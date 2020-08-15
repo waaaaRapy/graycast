@@ -324,7 +324,7 @@ Node* mul() {
 }
 
 /**
- *  unary_r := ("+" | "-" | "++" | "--")? unary_l
+ *  unary_r := ("+" | "-" | "++" | "--" | "!" | "~")? unary_l
  */
 Node* unary_r() {
   if (consume_if("+")) {
@@ -339,6 +339,10 @@ Node* unary_r() {
     Node* operand = unary_l();
     Node* rightval = new_node_opd(ND_SUB, operand, new_node_num(1));
     return new_node_opd(ND_ASSIGN, operand, rightval);
+  } else if (consume_if("!")) {
+    return new_node_opd(ND_EQ, new_node_num(0), unary_l());
+  } else if (consume_if("~")) {
+    return new_node_opd(ND_B_NOT, unary_l(), NULL);
   }
 
   return unary_l();
