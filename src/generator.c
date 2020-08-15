@@ -100,6 +100,22 @@ void generate(Node* node) {
       printf("  push rdi\n");
       return;
 
+    case ND_INC:
+    case ND_DEC:
+      // インクリメント・デクリメントの場合
+      generate_leftval(node->OP.lhs);  // 左辺値のアドレスをpush
+      printf("  pop rdx\n");
+      printf("  mov rax, [rdx]\n");
+      printf("  mov rdi, [rdx]\n");
+      if (node->kind == ND_INC) {
+        printf("  inc rdi\n");
+      } else {
+        printf("  dec rdi\n");
+      }
+      printf("  mov [rdx], rdi\n");
+      printf("  push rax\n");
+      return;
+
     case ND_RETURN:
       // return の場合
       generate(node->OP.lhs);

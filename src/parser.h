@@ -20,8 +20,9 @@
  *  equality   := relational ("==" relational | "!=" relational)*
  *  relational := add ("<" add | "<=" add | ">" add | ">=" add)*
  *  add        := mul ("+" mul | "-" mul)*
- *  mul        := unary ("*" unary | "/" unary | "%" unary)*
- *  unary      := ("+" | "-" | "++" | "--")? primary
+ *  mul        := unary_r ("*" unary_r | "/" unary_r | "%" unary_r)*
+ *  unary_r    := ("+" | "-" | "++" | "--")? unary_l
+ *  unary_l    := primary ("++" | "--")?
  *  primary    := `num`
  *              | `ident`
  *              | `ident` "(" (expr ("," expr)*)? ")"
@@ -60,5 +61,6 @@ Node* equality();
 Node* relational();
 Node* add();
 Node* mul();
-Node* unary();
+Node* unary_r();
+Node* unary_l();
 Node* primary();

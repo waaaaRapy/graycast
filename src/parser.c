@@ -305,18 +305,18 @@ Node* add() {
 }
 
 /**
- * mul := unary ("*" unary | "/" unary | "%" unary)*
+ * mul := unary_r ("*" unary_r | "/" unary_r | "%" unary_r)*
  */
 Node* mul() {
-  Node* node = unary();
+  Node* node = unary_r();
 
   for (;;) {
     if (consume_if("*")) {
-      node = new_node_opd(ND_MUL, node, unary());
+      node = new_node_opd(ND_MUL, node, unary_r());
     } else if (consume_if("/")) {
-      node = new_node_opd(ND_DIV, node, unary());
+      node = new_node_opd(ND_DIV, node, unary_r());
     } else if (consume_if("%")) {
-      node = new_node_opd(ND_MOD, node, unary());
+      node = new_node_opd(ND_MOD, node, unary_r());
     } else {
       return node;
     }
@@ -324,24 +324,39 @@ Node* mul() {
 }
 
 /**
- *  unary := ("+" | "-" | "++" | "--")? primary
+ *  unary_r := ("+" | "-" | "++" | "--")? unary_l
  */
-Node* unary() {
+Node* unary_r() {
   if (consume_if("+")) {
-    return primary();
+    return unary_l();
   } else if (consume_if("-")) {
-    return new_node_opd(ND_SUB, new_node_num(0), primary());
+    return new_node_opd(ND_SUB, new_node_num(0), unary_l());
   } else if (consume_if("++")) {
-    Node* operand = primary();
+    Node* operand = unary_l();
     Node* rightval = new_node_opd(ND_ADD, operand, new_node_num(1));
     return new_node_opd(ND_ASSIGN, operand, rightval);
   } else if (consume_if("--")) {
-    Node* operand = primary();
+    Node* operand = unary_l();
     Node* rightval = new_node_opd(ND_SUB, operand, new_node_num(1));
     return new_node_opd(ND_ASSIGN, operand, rightval);
   }
 
-  return primary();
+  return unary_l();
+}
+
+/**
+ * unary_l := primary ("++" | "--")?
+ */
+Node* unary_l() {
+  Node* node = primary();
+
+  if (consume_if("++")) {
+    node = new_node_opd(ND_INC, node, NULL);
+  } else if (consume_if("--")) {
+    node = new_node_opd(ND_DEC, node, NULL);
+  }
+
+  return node;
 }
 
 /**
