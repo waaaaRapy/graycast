@@ -57,3 +57,4 @@ if [ -f /etc/bash_completion ] && ! shopt -oq posix; then
 fi
 export PS1='🐳 \[\033[1;36m\]\h \[\033[1;34m\]\w\[\033[0;35m\] \[\033[36m\]`__git_ps1`\n\[\033[1;36m\]# \[\033[0m\]'
 export EDITOR="code -w"
+export GIT_EDITOR=$EDITOR
